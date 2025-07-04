@@ -1,51 +1,43 @@
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_events.h>
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
 #include <stdbool.h>
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 960
+#define HEIGHT 480
 
-SDL_Window *window;
-SDL_Surface *surface;
-Uint32 *pixels;
+SDL_Window* window;
+SDL_Surface* surface;
 
-void drawPixel( int x, int y, Uint32 color) {
-    if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-        pixels[y * WIDTH + x] = color;
-    }
+uint32_t* pixels;
+bool keys[512];
+
+int main() {
+	SDL_Init(SDL_INIT_VIDEO);
+	window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+	surface = SDL_GetWindowSurface(window);
+	pixels = (uint32_t*)surface->pixels;
+	
+	bool quit = false;
+	SDL_Event e;
+	while (!quit) {
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) {
+				quit = true;
+			}
+			else if (e.type == SDL_KEYDOWN) {
+				keys[e.key.keysym.sym] = true;
+			}
+			else if (e.type == SDL_KEYUP) {
+				keys[e.key.keysym.sym] = false;
+			}
+		}
+		SDL_LockSurface(surface);
+		
+		
+		SDL_UnlockSurface(surface);
+		SDL_UpdateWindowSurface(window);
+	}
+	
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 }
-
-Uint32 rgb(int r, int g, int b) {
-    return SDL_MapRGB(surface->format, r, g, b);
-}
-
-int WinMain(int argc, char *argv[]) {
-    if (SDL_VideoInit(NULL) < 0) return -1;
-    window = SDL_CreateWindow("SDL", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
-    if (!window) { SDL_VideoQuit(); return -1; }
-    surface = SDL_GetWindowSurface(window);
-    if (!surface) { SDL_DestroyWindow(window); SDL_VideoQuit(); return -1; }
-    
-
-    bool quit = false;
-    SDL_Event event;
-    while (!quit) {
-        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) quit = true;
-
-
-	pixels = (Uint32*)surface->pixels;
-	memset(pixels, 0, WIDTH * HEIGHT * sizeof(Uint32));
-
-
-        drawPixel(0, 0, rgb(255, 0, 255));
-        
-
-	SDL_UpdateWindowSurface(window);
-    }
-
-    SDL_FreeSurface(surface);
-    SDL_DestroyWindow(window);
-    SDL_VideoQuit();
-    return 0;
-}
-
