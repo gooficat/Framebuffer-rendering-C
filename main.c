@@ -11,6 +11,15 @@ SDL_Surface* surface;
 uint32_t* pixels;
 bool keys[512];
 
+uint32_t rgb(uint8_t r, uint8_t g, uint8_t b) {
+	return (uint32_t)SDL_MapRGB(surface->format, r, g, b);
+}
+
+void pixel(int x, int y, uint32_t color) {
+	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
+	pixels[y * WIDTH + x] = color;
+}
+
 int main() {
 	SDL_Init(SDL_INIT_VIDEO);
 	window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
@@ -32,7 +41,10 @@ int main() {
 			}
 		}
 		SDL_LockSurface(surface);
-		
+		memset(pixels, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
+
+		pixel(100, 100, 0xFFFFFFFF);
+
 		
 		SDL_UnlockSurface(surface);
 		SDL_UpdateWindowSurface(window);
